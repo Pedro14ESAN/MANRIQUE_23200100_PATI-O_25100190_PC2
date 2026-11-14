@@ -3,8 +3,10 @@ package com.example.pc2_grupal.apod.data
 import com.google.gson.annotations.SerializedName
 
 /**
- * Respuesta de planetary/apod. Todos los campos son opcionales porque la API
- * puede no enviarlos (por ejemplo hdurl y copyright), y así la app no se cae.
+ * Elemento de https://science.nasa.gov/wp-json/wp/v2/apod-basic.
+ * Ojo: aquí "url" es la página web; la imagen está en "hdurl".
+ * explanation, copyright y credit llegan en HTML.
+ * Todos los campos son opcionales para que la app no se caiga si falta alguno.
  */
 data class ApodDto(
     @SerializedName("date") val date: String?,
@@ -13,5 +15,7 @@ data class ApodDto(
     @SerializedName("url") val url: String?,
     @SerializedName("hdurl") val hdurl: String?,
     @SerializedName("media_type") val mediaType: String?,
-    @SerializedName("copyright") val copyright: String?
+    @SerializedName("copyright") val copyright: String?,
+    @SerializedName("credit") val credit: String?,
+    @SerializedName("alt") val alt: String?
 )
