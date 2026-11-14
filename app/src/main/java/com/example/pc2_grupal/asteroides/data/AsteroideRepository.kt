@@ -6,35 +6,39 @@ import java.time.format.DateTimeFormatter
 
 /**
  * Gestiona la API NeoWs y la base local. Las pantallas leen siempre de Room;
- * [actualizar] solo descarga de la API y guarda en la base.
+ * [refrescar] solo descarga de la API y guarda en la base, y Room avisa a la interfaz.
  */
 class AsteroideRepository(
     private val api: NeoWsApi,
     private val dao: AsteroideDao
 ) {
 
-    val asteroides: Flow<List<AsteroideEntity>> = dao.observarTodos()
+    /** Primer día del rango: 7 días contando hoy (NeoWs no acepta más de 7). */
+    private fun inicioDelRango(): String =
+        LocalDate.now().minusDays(6).format(DateTimeFormatter.ISO_LOCAL_DATE)
 
-    val favoritos: Flow<List<AsteroideEntity>> = dao.observarFavoritos()
+    /** Asteroides de los últimos 7 días guardados en Room; si [soloPeligrosos], solo esos. */
+    fun lista(soloPeligrosos: Boolean): Flow<List<AsteroideEntity>> {
+        val desde = inicioDelRango()
+        return if (soloPeligrosos) dao.observarPeligrosos(desde) else dao.observarLista(desde)
+    }
+
+    fun favoritos(): Flow<List<AsteroideEntity>> = dao.observarFavoritos()
 
     fun asteroide(id: String): Flow<AsteroideEntity?> = dao.observarPorId(id)
 
-    /** Descarga el feed de los últimos 7 días y lo guarda conservando los favoritos. */
-    suspend fun actualizar() {
-        val hoy = LocalDate.now()
-        val formato = DateTimeFormatter.ISO_LOCAL_DATE
+    /** Descarga el feed de los últimos 7 días y lo guarda en Room conservando los favoritos. */
+    suspend fun refrescar() {
         val respuesta = api.obtenerFeed(
-            fechaInicio = hoy.minusDays(6).format(formato),
-            fechaFin = hoy.format(formato)
+            fechaInicio = inicioDelRango(),
+            fechaFin = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
         )
-        val favoritos = dao.idsFavoritos().toSet()
-        val entidades = respuesta.todosLosAsteroides().mapNotNull { dto ->
-            dto.aEntity(esFavorito = dto.id in favoritos)
-        }
-        dao.insertarTodos(entidades)
+        // Se leen los favoritos ANTES del REPLACE; si no, se perderían cada vez que se refresca
+        val idsFavoritos = dao.idsFavoritos().toSet()
+        dao.insertarTodos(respuesta.aEntities(idsFavoritos))
     }
 
-    suspend fun cambiarFavorito(asteroide: AsteroideEntity) {
-        dao.actualizarFavorito(asteroide.id, !asteroide.esFavorito)
+    suspend fun cambiarFavorito(id: String, esFavorito: Boolean) {
+        dao.actualizarFavorito(id, esFavorito)
     }
 }
