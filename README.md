@@ -6,8 +6,8 @@ Aplicación Android en Kotlin y Jetpack Compose que consume la API abierta de la
 
 | Rol | Nombre | Opción |
 |---|---|---|
-| Alumno 1 | Pedro Luis | Imágenes (APOD) + base común |
-| Alumno 2 | _(nombre del compañero)_ | Asteroides (NeoWs) |
+| Alumno 1 | Pedro Luis Manrique (23200100) | Imágenes (APOD) + base común |
+| Alumno 2 | Patiño (25100190) | Asteroides (NeoWs) |
 
 ## Cómo ejecutar el proyecto
 
@@ -22,7 +22,7 @@ La clave se lee desde el código con `BuildConfig.NASA_API_KEY`, nunca se escrib
 
 ## División del trabajo
 
-### Alumno 1 – Pedro Luis
+### Alumno 1 – Pedro Luis Manrique
 **Base común (primer PR, se fusiona antes que todo lo demás):**
 - Dependencias en `libs.versions.toml`: Retrofit + conversor JSON, Coil, Room (KSP), Navigation Compose, ViewModel/Lifecycle.
 - `buildConfigField` que lee `NASA_API_KEY` desde `local.properties`.
@@ -36,7 +36,7 @@ La clave se lee desde el código con `BuildConfig.NASA_API_KEY`, nunca se escrib
 - Lista (más reciente primero; si `media_type` es `video`, texto "Contenido en video" sin cargar imagen), detalle (hdurl o url, título, fecha, explicación, copyright), botón de favorito y pantalla "Mis imágenes favoritas".
 - Indicador de carga, mensaje cuando no hay datos y manejo de campos nulos.
 
-### Alumno 2 – compañero
+### Alumno 2 – Patiño
 **Opción Asteroides (NeoWs):**
 - `NeoWsApi` (`GET neo/rest/v1/feed`, rango de 7 días), DTOs del feed (el JSON viene agrupado por fecha: `Map<String, List<AsteroideDto>>`), `AsteroideEntity`, `AsteroideDao` y conversión DTO → Entity (velocidad y distancia llegan como texto y se convierten a número).
 - Agregar la Entity y el DAO a `AppDatabase` (subir la versión).
