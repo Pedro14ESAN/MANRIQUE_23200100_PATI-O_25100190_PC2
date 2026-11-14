@@ -16,9 +16,10 @@ object RetrofitInstance {
 
     private const val URL_BASE = "https://api.nasa.gov/"
 
-    // Agrega api_key a todas las peticiones, así ninguna interfaz la tiene que pasar
+    // Agrega api_key a las peticiones de api.nasa.gov (a otros dominios no se envía la clave)
     private val interceptorApiKey = Interceptor { chain ->
         val original = chain.request()
+        if (original.url.host != "api.nasa.gov") return@Interceptor chain.proceed(original)
         val url = original.url.newBuilder()
             .addQueryParameter("api_key", BuildConfig.NASA_API_KEY)
             .build()
