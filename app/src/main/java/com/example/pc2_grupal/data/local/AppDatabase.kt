@@ -16,7 +16,7 @@ import com.example.pc2_grupal.asteroides.data.AsteroideEntity
  */
 @Database(
     entities = [ApodEntity::class, AsteroideEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
