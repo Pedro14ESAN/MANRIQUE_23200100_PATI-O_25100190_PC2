@@ -15,15 +15,23 @@ import com.example.pc2_grupal.ui.navigation.PestanaPrincipal
 
 private const val RUTA_LISTA = "imagenes/lista"
 private const val RUTA_DETALLE = "imagenes/detalle/{fecha}"
+private const val RUTA_FAVORITAS = "imagenes/favoritas"
 
-/** Navegación interna de la opción Imágenes (Alumno 1): lista y detalle. */
+/** Navegación interna de la opción Imágenes (Alumno 1): lista, detalle y favoritas. */
 fun NavGraphBuilder.imagenesGraph(navController: NavHostController) {
     navigation(startDestination = RUTA_LISTA, route = PestanaPrincipal.IMAGENES.ruta) {
         composable(RUTA_LISTA) { entrada ->
             ApodListaScreen(
                 viewModel = viewModelCompartido(entrada, navController),
                 onAbrirDetalle = { navController.navigate("imagenes/detalle/${Uri.encode(it.fecha)}") },
-                onAbrirFavoritas = { }
+                onAbrirFavoritas = { navController.navigate(RUTA_FAVORITAS) }
+            )
+        }
+        composable(RUTA_FAVORITAS) { entrada ->
+            ApodFavoritasScreen(
+                viewModel = viewModelCompartido(entrada, navController),
+                onAbrirDetalle = { navController.navigate("imagenes/detalle/${Uri.encode(it.fecha)}") },
+                onVolver = { navController.popBackStack() }
             )
         }
         composable(
