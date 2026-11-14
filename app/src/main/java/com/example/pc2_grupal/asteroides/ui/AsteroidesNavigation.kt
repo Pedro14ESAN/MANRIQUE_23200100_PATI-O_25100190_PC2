@@ -7,11 +7,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.example.pc2_grupal.ui.navigation.PestanaPrincipal
 
 private const val RUTA_LISTA = "asteroides/lista"
+private const val RUTA_DETALLE = "asteroides/detalle/{id}"
 
 /** Navegación interna de la opción Asteroides (Alumno 2). */
 fun NavGraphBuilder.asteroidesGraph(navController: NavHostController) {
@@ -21,6 +24,16 @@ fun NavGraphBuilder.asteroidesGraph(navController: NavHostController) {
                 viewModel = viewModelCompartido(entrada, navController),
                 onAbrirDetalle = { navController.navigate("asteroides/detalle/${Uri.encode(it.id)}") },
                 onAbrirFavoritos = { }
+            )
+        }
+        composable(
+            RUTA_DETALLE,
+            arguments = listOf(navArgument("id") { type = NavType.StringType })
+        ) { entrada ->
+            AsteroideDetalleScreen(
+                id = entrada.arguments?.getString("id").orEmpty(),
+                viewModel = viewModelCompartido(entrada, navController),
+                onVolver = { navController.popBackStack() }
             )
         }
     }
