@@ -1,8 +1,6 @@
 package com.example.pc2_grupal.apod.data
 
 import kotlinx.coroutines.flow.Flow
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 /**
  * Gestiona la API y la base local. Las pantallas leen siempre de Room;
@@ -19,14 +17,9 @@ class ApodRepository(
 
     fun imagen(fecha: String): Flow<ApodEntity?> = dao.observarPorFecha(fecha)
 
-    /** Descarga los últimos 7 días (desde hace 6 días hasta hoy) y los guarda conservando los favoritos. */
+    /** Descarga las 7 imágenes más recientes y las guarda conservando los favoritos. */
     suspend fun actualizar() {
-        val hoy = LocalDate.now()
-        val formato = DateTimeFormatter.ISO_LOCAL_DATE
-        val respuesta = api.obtenerImagenes(
-            fechaInicio = hoy.minusDays(6).format(formato),
-            fechaFin = hoy.format(formato)
-        )
+        val respuesta = api.obtenerImagenes(cantidad = 7)
         val favoritas = dao.fechasFavoritas().toSet()
         val entidades = respuesta.mapNotNull { dto ->
             dto.aEntity(esFavorito = dto.date in favoritas)
