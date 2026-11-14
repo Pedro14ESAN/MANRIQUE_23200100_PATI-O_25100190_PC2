@@ -9,11 +9,21 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface AsteroideDao {
 
-    // Los más recientes primero
-    @Query("SELECT * FROM asteroides ORDER BY fecha_aproximacion DESC, epoch_aproximacion DESC")
-    fun observarTodos(): Flow<List<AsteroideEntity>>
+    // Solo desde la fecha indicada, para que no se acumulen los de días anteriores.
+    // Los más recientes primero y, en la misma fecha, por nombre.
+    @Query(
+        "SELECT * FROM asteroides WHERE fecha_aproximacion >= :desde " +
+            "ORDER BY fecha_aproximacion DESC, nombre ASC"
+    )
+    fun observarLista(desde: String): Flow<List<AsteroideEntity>>
 
-    @Query("SELECT * FROM asteroides WHERE es_favorito = 1 ORDER BY fecha_aproximacion DESC, epoch_aproximacion DESC")
+    @Query(
+        "SELECT * FROM asteroides WHERE fecha_aproximacion >= :desde AND es_peligroso = 1 " +
+            "ORDER BY fecha_aproximacion DESC, nombre ASC"
+    )
+    fun observarPeligrosos(desde: String): Flow<List<AsteroideEntity>>
+
+    @Query("SELECT * FROM asteroides WHERE es_favorito = 1 ORDER BY fecha_aproximacion DESC, nombre ASC")
     fun observarFavoritos(): Flow<List<AsteroideEntity>>
 
     @Query("SELECT * FROM asteroides WHERE id = :id")

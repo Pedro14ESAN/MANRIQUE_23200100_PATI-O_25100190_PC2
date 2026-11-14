@@ -35,14 +35,17 @@ fun AsteroidesListaScreen(
     onAbrirDetalle: (AsteroideEntity) -> Unit,
     onAbrirFavoritos: () -> Unit
 ) {
-    val estado by viewModel.uiState.collectAsStateWithLifecycle()
+    val asteroides by viewModel.asteroides.collectAsStateWithLifecycle()
+    val cargando by viewModel.cargando.collectAsStateWithLifecycle()
+    val mensajeError by viewModel.error.collectAsStateWithLifecycle()
+    val soloPeligrosos by viewModel.soloPeligrosos.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Asteroides cercanos") },
                 actions = {
-                    IconButton(onClick = viewModel::actualizar) {
+                    IconButton(onClick = viewModel::refrescar) {
                         Icon(Icons.Filled.Refresh, contentDescription = "Actualizar")
                     }
                     IconButton(onClick = onAbrirFavoritos) {
@@ -55,44 +58,51 @@ fun AsteroidesListaScreen(
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {
             // Interruptor de filtro en la parte superior de la lista
             Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("Solo potencialmente peligrosos", modifier = Modifier.weight(1f))
-                Switch(checked = estado.soloPeligrosos, onCheckedChange = viewModel::cambiarFiltro)
+                Switch(checked = soloPeligrosos, onCheckedChange = viewModel::cambiarFiltro)
             }
-            if (estado.cargando && estado.asteroides.isNotEmpty()) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-            }
+
             when {
-                estado.cargando && estado.asteroides.isEmpty() -> Box(
+                // Primera carga: todavía no hay nada guardado
+                cargando && asteroides.isEmpty() -> Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) { CircularProgressIndicator() }
 
-                estado.asteroides.isEmpty() -> MensajeAsteroides(
-                    texto = estado.error ?: if (estado.soloPeligrosos) {
-                        "No hay asteroides potencialmente peligrosos en estos 7 días."
-                    } else {
-                        "No hay asteroides para mostrar."
+                asteroides.isEmpty() -> {
+                    val error = mensajeError
+                    val texto = when {
+                        error != null && soloPeligrosos ->
+                            "$error\nNo hay asteroides potencialmente peligrosos guardados."
+                        error != null -> "$error\nTodavía no hay asteroides guardados."
+                        soloPeligrosos -> "No hay asteroides potencialmente peligrosos en los últimos 7 días."
+                        else -> "No hay asteroides para mostrar en los últimos 7 días."
                     }
-                ) {
-                    if (estado.error != null) {
-                        Button(onClick = viewModel::actualizar) { Text("Reintentar") }
+                    MensajeAsteroides(texto = texto) {
+                        Button(onClick = viewModel::refrescar) { Text("Reintentar") }
                     }
                 }
 
                 else -> {
-                    estado.error?.let {
+                    if (cargando) {
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    }
+                    // El error se muestra sin ocultar los datos guardados en Room
+                    mensajeError?.let {
                         Text(
-                            it,
+                            "$it Se muestran los asteroides guardados.",
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
                         )
                     }
                     ListaAsteroides(
-                        asteroides = estado.asteroides,
+                        asteroides = asteroides,
                         onAbrir = onAbrirDetalle,
                         onFavorito = viewModel::cambiarFavorito
                     )

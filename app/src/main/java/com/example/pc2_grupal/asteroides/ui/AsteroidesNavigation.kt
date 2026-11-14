@@ -17,20 +17,22 @@ private const val RUTA_LISTA = "asteroides/lista"
 private const val RUTA_DETALLE = "asteroides/detalle/{id}"
 private const val RUTA_FAVORITOS = "asteroides/favoritos"
 
+private fun rutaDetalle(id: String) = "asteroides/detalle/${Uri.encode(id)}"
+
 /** Navegación interna de la opción Asteroides (Alumno 2): lista, detalle y "Mis asteroides". */
 fun NavGraphBuilder.asteroidesGraph(navController: NavHostController) {
     navigation(startDestination = RUTA_LISTA, route = PestanaPrincipal.ASTEROIDES.ruta) {
         composable(RUTA_LISTA) { entrada ->
             AsteroidesListaScreen(
                 viewModel = viewModelCompartido(entrada, navController),
-                onAbrirDetalle = { navController.navigate("asteroides/detalle/${Uri.encode(it.id)}") },
+                onAbrirDetalle = { navController.navigate(rutaDetalle(it.id)) },
                 onAbrirFavoritos = { navController.navigate(RUTA_FAVORITOS) }
             )
         }
         composable(RUTA_FAVORITOS) { entrada ->
             MisAsteroidesScreen(
                 viewModel = viewModelCompartido(entrada, navController),
-                onAbrirDetalle = { navController.navigate("asteroides/detalle/${Uri.encode(it.id)}") },
+                onAbrirDetalle = { navController.navigate(rutaDetalle(it.id)) },
                 onVolver = { navController.popBackStack() }
             )
         }
@@ -47,9 +49,12 @@ fun NavGraphBuilder.asteroidesGraph(navController: NavHostController) {
     }
 }
 
-/** Un solo AsteroideViewModel para todas las pantallas de la opción Asteroides. */
+/**
+ * Un solo AsteroideViewModel para las tres pantallas: se guarda en la entrada del grafo
+ * "asteroides", así abrir el detalle o "Mis asteroides" no vuelve a consultar la API.
+ */
 @Composable
 private fun viewModelCompartido(entrada: NavBackStackEntry, navController: NavHostController): AsteroideViewModel {
     val padre = remember(entrada) { navController.getBackStackEntry(PestanaPrincipal.ASTEROIDES.ruta) }
-    return viewModel(padre)
+    return viewModel(viewModelStoreOwner = padre)
 }
