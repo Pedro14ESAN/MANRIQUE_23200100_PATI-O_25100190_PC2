@@ -15,15 +15,23 @@ import com.example.pc2_grupal.ui.navigation.PestanaPrincipal
 
 private const val RUTA_LISTA = "asteroides/lista"
 private const val RUTA_DETALLE = "asteroides/detalle/{id}"
+private const val RUTA_FAVORITOS = "asteroides/favoritos"
 
-/** Navegación interna de la opción Asteroides (Alumno 2). */
+/** Navegación interna de la opción Asteroides (Alumno 2): lista, detalle y "Mis asteroides". */
 fun NavGraphBuilder.asteroidesGraph(navController: NavHostController) {
     navigation(startDestination = RUTA_LISTA, route = PestanaPrincipal.ASTEROIDES.ruta) {
         composable(RUTA_LISTA) { entrada ->
             AsteroidesListaScreen(
                 viewModel = viewModelCompartido(entrada, navController),
                 onAbrirDetalle = { navController.navigate("asteroides/detalle/${Uri.encode(it.id)}") },
-                onAbrirFavoritos = { }
+                onAbrirFavoritos = { navController.navigate(RUTA_FAVORITOS) }
+            )
+        }
+        composable(RUTA_FAVORITOS) { entrada ->
+            MisAsteroidesScreen(
+                viewModel = viewModelCompartido(entrada, navController),
+                onAbrirDetalle = { navController.navigate("asteroides/detalle/${Uri.encode(it.id)}") },
+                onVolver = { navController.popBackStack() }
             )
         }
         composable(
