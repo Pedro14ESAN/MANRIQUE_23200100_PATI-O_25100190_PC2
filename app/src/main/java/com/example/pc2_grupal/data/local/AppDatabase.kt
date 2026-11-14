@@ -6,6 +6,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.pc2_grupal.apod.data.ApodDao
 import com.example.pc2_grupal.apod.data.ApodEntity
+import com.example.pc2_grupal.asteroides.data.AsteroideDao
+import com.example.pc2_grupal.asteroides.data.AsteroideEntity
 
 /**
  * Base de datos SQLite compartida por las dos opciones.
@@ -13,13 +15,15 @@ import com.example.pc2_grupal.apod.data.ApodEntity
  * agregar su DAO abajo y subir `version` en 1.
  */
 @Database(
-    entities = [ApodEntity::class],
-    version = 1,
+    entities = [ApodEntity::class, AsteroideEntity::class],
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun apodDao(): ApodDao
+
+    abstract fun asteroideDao(): AsteroideDao
 
     companion object {
         @Volatile
