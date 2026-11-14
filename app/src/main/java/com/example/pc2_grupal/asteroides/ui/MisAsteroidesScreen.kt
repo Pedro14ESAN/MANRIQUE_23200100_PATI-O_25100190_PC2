@@ -38,10 +38,11 @@ fun MisAsteroidesScreen(
     ) { padding ->
         if (favoritos.isEmpty()) {
             MensajeAsteroides(
-                "Aún no tienes asteroides favoritos. Toca la estrella en un asteroide para guardarlo aquí.",
+                "Aún no tienes asteroides en Mis asteroides. Toca la estrella de un asteroide para guardarlo aquí.",
                 Modifier.padding(padding)
             )
         } else {
+            // Tocar la estrella aquí lo quita de favoritos y desaparece de la lista
             ListaAsteroides(
                 asteroides = favoritos,
                 onAbrir = onAbrirDetalle,

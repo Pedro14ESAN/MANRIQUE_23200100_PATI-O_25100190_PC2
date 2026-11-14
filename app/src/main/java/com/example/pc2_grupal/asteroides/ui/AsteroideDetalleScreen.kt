@@ -19,8 +19,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -33,8 +33,10 @@ fun AsteroideDetalleScreen(
     viewModel: AsteroideViewModel,
     onVolver: () -> Unit
 ) {
-    val asteroideFlow = remember(id) { viewModel.asteroide(id) }
-    val asteroide by asteroideFlow.collectAsStateWithLifecycle()
+    LaunchedEffect(id) { viewModel.seleccionarAsteroide(id) }
+    val detalle by viewModel.detalle.collectAsStateWithLifecycle()
+    // Mientras llega el seleccionado, detalle podría tener todavía el asteroide anterior
+    val asteroide = detalle?.takeIf { it.id == id }
 
     Scaffold(
         topBar = {
@@ -53,8 +55,7 @@ fun AsteroideDetalleScreen(
             )
         }
     ) { padding ->
-        val actual = asteroide
-        if (actual == null) {
+        if (asteroide == null) {
             Box(Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
@@ -68,16 +69,16 @@ fun AsteroideDetalleScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text(actual.nombre, style = MaterialTheme.typography.headlineSmall)
-            if (actual.esPeligroso) EtiquetaPeligroso()
+            Text(asteroide.nombre, style = MaterialTheme.typography.headlineSmall)
+            if (asteroide.esPeligroso) EtiquetaPeligroso()
             HorizontalDivider()
-            Dato("Id", actual.id)
-            Dato("Fecha de aproximación", actual.fechaAproximacion)
-            Dato("Diámetro mínimo estimado", conUnidad(actual.diametroMinM, "m"))
-            Dato("Diámetro máximo estimado", conUnidad(actual.diametroMaxM, "m"))
-            Dato("Velocidad relativa", conUnidad(actual.velocidadKmH, "km/h"))
-            Dato("Distancia de paso", conUnidad(actual.distanciaKm, "km"))
-            Dato("Potencialmente peligroso", if (actual.esPeligroso) "Sí" else "No")
+            Dato("Id", asteroide.id)
+            Dato("Fecha de aproximación", asteroide.fechaAproximacion)
+            Dato("Diámetro mínimo estimado", conUnidad(asteroide.diametroMinM, "m"))
+            Dato("Diámetro máximo estimado", conUnidad(asteroide.diametroMaxM, "m"))
+            Dato("Velocidad relativa", conUnidad(asteroide.velocidadKmh, "km/h"))
+            Dato("Distancia de paso", conUnidad(asteroide.distanciaKm, "km"))
+            Dato("Potencialmente peligroso", if (asteroide.esPeligroso) "Sí" else "No")
         }
     }
 }
@@ -85,7 +86,11 @@ fun AsteroideDetalleScreen(
 @Composable
 private fun Dato(etiqueta: String, valor: String) {
     Column {
-        Text(etiqueta, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            etiqueta,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
         Text(valor, style = MaterialTheme.typography.bodyLarge)
     }
 }
